@@ -1,0 +1,195 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    overflow-x: auto; /* Scroll orizzontale globale */
+    background-color: #f5f5f5;
+  }
+  
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    background-color: #0977b8;
+    color: white;
+    z-index: 1000;
+    border-bottom: 2px solid #065a8d;
+    height: 60px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .header-content {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+  }
+  
+  .logo {
+    height: 40px;
+    margin-right: 15px;
+  }
+  
+  .content-area {
+    margin-top: 60px;
+    padding: 0 20px;
+    /* nessun overflow qui */
+  }
+  
+  .container {
+    padding: 20px 0;
+    min-width: 1200px; /* forza lo scroll orizzontale a livello del body */
+    background: white;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Input file */
+  input[type="file"] {
+    margin-bottom: 10px;
+  }
+  
+  /* Filtri */
+  #filtersContainer {
+    margin-top: 10px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+  
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #f0f8ff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+  }
+  
+  .filter-input {
+    padding: 4px;
+    width: 80px;
+  }
+  
+  #filterButton {
+    margin-top: 10px;
+    padding: 6px 12px;
+    background-color: #0977b8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  #filterButton:hover {
+    background-color: #065a8d;
+  }
+  
+  /* Tabella */
+  .data-table {
+    width: max-content;
+    border-collapse: collapse;
+    margin-top: 10px;
+    /* nessun overflow qui */
+  }
+  
+  .data-table th,
+  .data-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  
+  .data-table th {
+    background-color: #0977b8;
+    color: black ;
+    text-align: center;
+  }
+  
+  .data-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  /* Select */
+  select {
+    margin-top: 10px;
+    padding: 5px;
+    width: 100%;
+  }
+  
+  /* Grafici */
+  canvas {
+    margin-top: 20px;
+    width: 100% !important;
+    max-height: 400px;
+  }
+  
+  /* Somma */
+  .sum-output {
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #0977b8;
+  }
+  /* Back button */
+#backButton {
+  padding: 6px 12px;
+  background-color: #0977b8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+#backButton:hover {
+  background-color: #065a8d;
+}
+
+.container h2 {
+  margin-top: 20px;
+  font-size: 1.5rem;
+  color: #0977b8;
+}
+
+.container h3 {
+  margin-top: 20px;
+  font-size: 1.3rem;
+  color: #2196F3;
+}
+
+.container p, .container ul {
+  font-size: 1rem;
+  color: #333;
+}
+
+.container ul {
+  margin-left: 20px;
+}
+
+.container img {
+  margin-top: 10px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 8px;
+}
+/* Bottone per le Istruzioni */
+#instructionsButton {
+  padding: 10px 20px;
+  background-color: #0977b8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+#instructionsButton:hover {
+  background-color: #065a8d;
+}
+
+  
