@@ -25,48 +25,58 @@ document.addEventListener("DOMContentLoaded", function () {
     function generateTable(data, visibleColumns = null) {
         const tableContainer = document.getElementById("tableContainer");
         tableContainer.innerHTML = "";
-
+    
         if (!Array.isArray(data) || data.length === 0) {
             alert("Il JSON caricato non è valido");
             return;
         }
-
+    
         const table = document.createElement("table");
         table.classList.add("data-table");
+        table.id = "dataTable"; // Aggiungiamo un ID alla tabella per riferimento
         const headerRow = document.createElement("tr");
-
+    
         const columns = visibleColumns || Object.keys(data[0]);
-
+    
         columns.forEach(column => {
             const th = document.createElement("th");
-
+    
             const group = document.createElement("div");
             group.classList.add("filter-group");
-
+    
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.checked = selectedColumns.includes(column);
             checkbox.addEventListener("change", () => toggleColumnSelection(column, checkbox.checked));
-
+    
             const label = document.createElement("label");
             label.textContent = column;
-
+    
             const filterInput = document.createElement("input");
             filterInput.type = "text";
             filterInput.placeholder = "Filtra...";
             filterInput.classList.add("filter-input");
             filterInput.dataset.column = column;
-
+    
+            // Aggiungiamo il pulsante di ordinamento a forma di freccia
+            const sortButton = document.createElement("button");
+            sortButton.classList.add("sort-button");
+            sortButton.innerHTML = "↕️"; // Freccia su e giù
+            sortButton.dataset.column = column;
+            sortButton.dataset.direction = "none"; // Stato iniziale: nessun ordinamento
+            sortButton.addEventListener("click", () => sortTableByColumn(data, column, sortButton));
+    
             group.appendChild(checkbox);
             group.appendChild(label);
             group.appendChild(filterInput);
-
+            group.appendChild(sortButton);
+    
             th.appendChild(group);
             headerRow.appendChild(th);
         });
-
+    
         table.appendChild(headerRow);
-
+    
         data.forEach(row => {
             const tr = document.createElement("tr");
             columns.forEach(column => {
@@ -76,8 +86,91 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             table.appendChild(tr);
         });
-
+    
         tableContainer.appendChild(table);
+    }
+
+    // Funzione separata per l'ordinamento della tabella
+    function sortTableByColumn(originalData, columnName, button) {
+        // Creiamo una copia dei dati originali per non modificarli
+        let tableData = [...originalData];
+        
+        // Otteniamo la direzione corrente di ordinamento
+        const currentDirection = button.dataset.direction;
+        
+        // Resettiamo tutti i pulsanti di ordinamento
+        document.querySelectorAll(".sort-button").forEach(btn => {
+            btn.dataset.direction = "none";
+            btn.innerHTML = "↕️";
+        });
+        
+        let newDirection;
+        
+        // Determiniamo la nuova direzione di ordinamento
+        switch (currentDirection) {
+            case "none":
+            case "desc":
+                newDirection = "asc";
+                button.innerHTML = "↑";
+                break;
+            case "asc":
+                newDirection = "desc";
+                button.innerHTML = "↓";
+                break;
+        }
+        
+        // Aggiorniamo lo stato del pulsante
+        button.dataset.direction = newDirection;
+        
+        // Ordiniamo i dati
+        tableData.sort((a, b) => {
+            let valA = a[columnName];
+            let valB = b[columnName];
+            
+            // Verifichiamo se i valori sono numerici
+            const isNumeric = !isNaN(parseFloat(valA)) && !isNaN(parseFloat(valB));
+            
+            if (isNumeric) {
+                valA = parseFloat(valA);
+                valB = parseFloat(valB);
+            } else {
+                // Per le stringhe, convertiamo tutto in minuscolo per un confronto case-insensitive
+                valA = String(valA).toLowerCase();
+                valB = String(valB).toLowerCase();
+            }
+            
+            // Confrontiamo i valori
+            if (valA < valB) return newDirection === "asc" ? -1 : 1;
+            if (valA > valB) return newDirection === "asc" ? 1 : -1;
+            return 0;
+        });
+        
+        // Otteniamo la tabella e le colonne visibili
+        const table = document.getElementById("dataTable");
+        const visibleColumns = [];
+        const headers = table.querySelectorAll("th");
+        
+        headers.forEach(header => {
+            const group = header.querySelector(".filter-group");
+            const label = group.querySelector("label");
+            visibleColumns.push(label.textContent);
+        });
+        
+        // Rimuoviamo tutte le righe tranne l'intestazione
+        while (table.rows.length > 1) {
+            table.deleteRow(1);
+        }
+        
+        // Aggiungiamo le righe ordinate
+        tableData.forEach(row => {
+            const tr = document.createElement("tr");
+            visibleColumns.forEach(column => {
+                const td = document.createElement("td");
+                td.textContent = row[column];
+                tr.appendChild(td);
+            });
+            table.appendChild(tr);
+        });
     }
     function toggleColumnSelection(column, isChecked) {
         if (isChecked) {
