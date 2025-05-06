@@ -104,13 +104,13 @@ document.addEventListener("DOMContentLoaded", function () {
     
         const currentDirection = button.dataset.direction;
     
+        // Reset di tutte le frecce
         document.querySelectorAll(".sort-button").forEach(btn => {
             btn.dataset.direction = "none";
             btn.innerHTML = "↕️";
         });
     
         let newDirection;
-    
         switch (currentDirection) {
             case "none":
             case "desc":
@@ -129,7 +129,6 @@ document.addEventListener("DOMContentLoaded", function () {
             let valA = a[columnName];
             let valB = b[columnName];
     
-            // ✅ Usa parseEuropeanNumber per entrambi i valori
             const parsedA = parseEuropeanNumber(valA);
             const parsedB = parseEuropeanNumber(valB);
     
@@ -149,30 +148,18 @@ document.addEventListener("DOMContentLoaded", function () {
             return 0;
         });
     
+        // Ottieni le colonne visibili dalla tabella attuale
         const table = document.getElementById("dataTable");
         const visibleColumns = [];
-        const headers = table.querySelectorAll("th");
-    
-        headers.forEach(header => {
-            const group = header.querySelector(".filter-group");
-            const label = group.querySelector("label");
-            visibleColumns.push(label.textContent);
+        table.querySelectorAll("th").forEach(th => {
+            const label = th.querySelector("label");
+            if (label) visibleColumns.push(label.textContent);
         });
     
-        while (table.rows.length > 1) {
-            table.deleteRow(1);
-        }
-    
-        tableData.forEach(row => {
-            const tr = document.createElement("tr");
-            visibleColumns.forEach(column => {
-                const td = document.createElement("td");
-                td.textContent = row[column];
-                tr.appendChild(td);
-            });
-            table.appendChild(tr);
-        });
+        // ✅ Rigenera la tabella con i dati ordinati
+        generateTable(tableData, visibleColumns);
     }
+    
     
 
     function toggleColumnSelection(column, isChecked) {
