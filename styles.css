@@ -191,5 +191,21 @@ body {
 #instructionsButton:hover {
   background-color: #065a8d;
 }
+.sort-button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 16px;
+  padding: 0 5px;
+  vertical-align: middle;
+}
+.sort-button:hover {
+  background-color: #f0f0f0;
+}
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
 
   

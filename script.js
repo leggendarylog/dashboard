@@ -127,12 +127,34 @@ document.addEventListener("DOMContentLoaded", function () {
             let valA = a[columnName];
             let valB = b[columnName];
             
-            // Verifichiamo se i valori sono numerici
-            const isNumeric = !isNaN(parseFloat(valA)) && !isNaN(parseFloat(valB));
+            // Funzione per convertire numeri in formato italiano in formato standard JavaScript
+            function parseItalianNumber(numStr) {
+                if (typeof numStr !== 'string') {
+                    return numStr;
+                }
+                
+                // Verifichiamo se la stringa ha il formato italiano dei numeri (es. 1.234,56)
+                const italianNumberRegex = /^-?\d{1,3}(?:\.\d{3})*(?:,\d+)?$/;
+                
+                if (italianNumberRegex.test(numStr.trim())) {
+                    // Rimuoviamo i punti e sostituiamo la virgola con il punto
+                    return parseFloat(numStr.replace(/\./g, '').replace(',', '.'));
+                }
+                
+                return numStr;
+            }
+            
+            // Tentiamo di convertire in numeri se possibile
+            const parsedA = parseItalianNumber(valA);
+            const parsedB = parseItalianNumber(valB);
+            
+            // Verifichiamo se entrambi i valori sono ora numeri
+            const isNumeric = typeof parsedA === 'number' && typeof parsedB === 'number' && 
+                              !isNaN(parsedA) && !isNaN(parsedB);
             
             if (isNumeric) {
-                valA = parseFloat(valA);
-                valB = parseFloat(valB);
+                valA = parsedA;
+                valB = parsedB;
             } else {
                 // Per le stringhe, convertiamo tutto in minuscolo per un confronto case-insensitive
                 valA = String(valA).toLowerCase();
@@ -172,6 +194,7 @@ document.addEventListener("DOMContentLoaded", function () {
             table.appendChild(tr);
         });
     }
+    
     function toggleColumnSelection(column, isChecked) {
         if (isChecked) {
             selectedColumns.push(column);
