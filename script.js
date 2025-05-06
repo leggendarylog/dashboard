@@ -25,48 +25,48 @@ document.addEventListener("DOMContentLoaded", function () {
     function generateTable(data, visibleColumns = null) {
         const tableContainer = document.getElementById("tableContainer");
         tableContainer.innerHTML = "";
-    
+
         if (!Array.isArray(data) || data.length === 0) {
             alert("Il JSON caricato non è valido");
             return;
         }
-    
+
         const table = document.createElement("table");
         table.classList.add("data-table");
         const headerRow = document.createElement("tr");
-    
+
         const columns = visibleColumns || Object.keys(data[0]);
-    
+
         columns.forEach(column => {
             const th = document.createElement("th");
-    
+
             const group = document.createElement("div");
             group.classList.add("filter-group");
-    
+
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.checked = selectedColumns.includes(column);
             checkbox.addEventListener("change", () => toggleColumnSelection(column, checkbox.checked));
-    
+
             const label = document.createElement("label");
             label.textContent = column;
-    
+
             const filterInput = document.createElement("input");
             filterInput.type = "text";
             filterInput.placeholder = "Filtra...";
             filterInput.classList.add("filter-input");
             filterInput.dataset.column = column;
-    
+
             group.appendChild(checkbox);
             group.appendChild(label);
             group.appendChild(filterInput);
-    
+
             th.appendChild(group);
             headerRow.appendChild(th);
         });
-    
+
         table.appendChild(headerRow);
-    
+
         data.forEach(row => {
             const tr = document.createElement("tr");
             columns.forEach(column => {
@@ -76,13 +76,9 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             table.appendChild(tr);
         });
-    
+
         tableContainer.appendChild(table);
     }
-    
-    
-    
-
     function toggleColumnSelection(column, isChecked) {
         if (isChecked) {
             selectedColumns.push(column);
