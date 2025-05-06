@@ -92,21 +92,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Funzione separata per l'ordinamento della tabella
     function sortTableByColumn(originalData, columnName, button) {
-        // Creiamo una copia dei dati originali per non modificarli
         let tableData = [...originalData];
-        
-        // Otteniamo la direzione corrente di ordinamento
+    
         const currentDirection = button.dataset.direction;
-        
-        // Resettiamo tutti i pulsanti di ordinamento
+    
         document.querySelectorAll(".sort-button").forEach(btn => {
             btn.dataset.direction = "none";
             btn.innerHTML = "↕️";
         });
-        
+    
         let newDirection;
-        
-        // Determiniamo la nuova direzione di ordinamento
+    
         switch (currentDirection) {
             case "none":
             case "desc":
@@ -118,72 +114,47 @@ document.addEventListener("DOMContentLoaded", function () {
                 button.innerHTML = "↓";
                 break;
         }
-        
-        // Aggiorniamo lo stato del pulsante
+    
         button.dataset.direction = newDirection;
-        
-        // Ordiniamo i dati
+    
         tableData.sort((a, b) => {
             let valA = a[columnName];
             let valB = b[columnName];
-            
-            // Funzione per convertire numeri in formato italiano in formato standard JavaScript
-            function parseItalianNumber(numStr) {
-                if (typeof numStr !== 'string') {
-                    return numStr;
-                }
-                
-                // Verifichiamo se la stringa ha il formato italiano dei numeri (es. 1.234,56)
-                const italianNumberRegex = /^-?\d{1,3}(?:\.\d{3})*(?:,\d+)?$/;
-                
-                if (italianNumberRegex.test(numStr.trim())) {
-                    // Rimuoviamo i punti e sostituiamo la virgola con il punto
-                    return parseFloat(numStr.replace(/\./g, '').replace(',', '.'));
-                }
-                
-                return numStr;
-            }
-            
-            // Tentiamo di convertire in numeri se possibile
-            const parsedA = parseItalianNumber(valA);
-            const parsedB = parseItalianNumber(valB);
-            
-            // Verifichiamo se entrambi i valori sono ora numeri
-            const isNumeric = typeof parsedA === 'number' && typeof parsedB === 'number' && 
+    
+            // ✅ Usa parseEuropeanNumber per entrambi i valori
+            const parsedA = parseEuropeanNumber(valA);
+            const parsedB = parseEuropeanNumber(valB);
+    
+            const isNumeric = typeof parsedA === 'number' && typeof parsedB === 'number' &&
                               !isNaN(parsedA) && !isNaN(parsedB);
-            
+    
             if (isNumeric) {
                 valA = parsedA;
                 valB = parsedB;
             } else {
-                // Per le stringhe, convertiamo tutto in minuscolo per un confronto case-insensitive
                 valA = String(valA).toLowerCase();
                 valB = String(valB).toLowerCase();
             }
-            
-            // Confrontiamo i valori
+    
             if (valA < valB) return newDirection === "asc" ? -1 : 1;
             if (valA > valB) return newDirection === "asc" ? 1 : -1;
             return 0;
         });
-        
-        // Otteniamo la tabella e le colonne visibili
+    
         const table = document.getElementById("dataTable");
         const visibleColumns = [];
         const headers = table.querySelectorAll("th");
-        
+    
         headers.forEach(header => {
             const group = header.querySelector(".filter-group");
             const label = group.querySelector("label");
             visibleColumns.push(label.textContent);
         });
-        
-        // Rimuoviamo tutte le righe tranne l'intestazione
+    
         while (table.rows.length > 1) {
             table.deleteRow(1);
         }
-        
-        // Aggiungiamo le righe ordinate
+    
         tableData.forEach(row => {
             const tr = document.createElement("tr");
             visibleColumns.forEach(column => {
@@ -195,6 +166,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
     
+
     function toggleColumnSelection(column, isChecked) {
         if (isChecked) {
             selectedColumns.push(column);
