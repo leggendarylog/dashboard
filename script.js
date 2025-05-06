@@ -23,83 +23,145 @@ document.addEventListener("DOMContentLoaded", function () {
 
     //generazione tabella iniziale
     function generateTable(data, visibleColumns = null) {
-        const tableContainer = document.getElementById("tableContainer");
-        tableContainer.innerHTML = "";
-    
-        if (!Array.isArray(data) || data.length === 0) {
-            alert("Il JSON caricato non è valido");
-            return;
-        }
-    
-        const table = document.createElement("table");
-        table.classList.add("data-table");
-        const headerRow = document.createElement("tr");
-    
-        const columns = visibleColumns || Object.keys(data[0]);
-    
+    const tableContainer = document.getElementById("tableContainer");
+    tableContainer.innerHTML = "";
+
+    if (!Array.isArray(data) || data.length === 0) {
+        alert("Il JSON caricato non è valido");
+        return;
+    }
+
+    // Creiamo una copia dei dati originali per non modificarli
+    let tableData = [...data];
+    const table = document.createElement("table");
+    table.classList.add("data-table");
+    const headerRow = document.createElement("tr");
+
+    const columns = visibleColumns || Object.keys(data[0]);
+
+    columns.forEach(column => {
+        const th = document.createElement("th");
+
+        const group = document.createElement("div");
+        group.classList.add("filter-group");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = selectedColumns.includes(column);
+        checkbox.addEventListener("change", () => toggleColumnSelection(column, checkbox.checked));
+
+        const label = document.createElement("label");
+        label.textContent = column;
+
+        const filterInput = document.createElement("input");
+        filterInput.type = "text";
+        filterInput.placeholder = "Filtra...";
+        filterInput.classList.add("filter-input");
+        filterInput.dataset.column = column;
+
+        // Aggiungiamo il pulsante di ordinamento a forma di freccia
+        const sortButton = document.createElement("button");
+        sortButton.classList.add("sort-button");
+        sortButton.innerHTML = "↕️"; // Freccia su e giù
+        sortButton.dataset.column = column;
+        sortButton.dataset.direction = "none"; // Stato iniziale: nessun ordinamento
+        sortButton.addEventListener("click", () => sortTableByColumn(column, sortButton));
+
+        group.appendChild(checkbox);
+        group.appendChild(label);
+        group.appendChild(filterInput);
+        group.appendChild(sortButton);
+
+        th.appendChild(group);
+        headerRow.appendChild(th);
+    });
+
+    table.appendChild(headerRow);
+
+    tableData.forEach(row => {
+        const tr = document.createElement("tr");
         columns.forEach(column => {
-            const th = document.createElement("th");
-    
-            const group = document.createElement("div");
-            group.classList.add("filter-group");
-    
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.checked = selectedColumns.includes(column);
-            checkbox.addEventListener("change", () => toggleColumnSelection(column, checkbox.checked));
-    
-            const label = document.createElement("label");
-            label.textContent = column;
-    
-            const filterInput = document.createElement("input");
-            filterInput.type = "text";
-            filterInput.placeholder = "Filtra...";
-            filterInput.classList.add("filter-input");
-            filterInput.dataset.column = column;
-    
-            group.appendChild(checkbox);
-            group.appendChild(label);
-            group.appendChild(filterInput);
-    
-            th.appendChild(group);
-            headerRow.appendChild(th);
+            const td = document.createElement("td");
+            td.textContent = row[column];
+            tr.appendChild(td);
         });
-    
-        table.appendChild(headerRow);
-    
-        data.forEach(row => {
+        table.appendChild(tr);
+    });
+
+    tableContainer.appendChild(table);
+
+    // Funzione per ordinare i dati della tabella in base alla colonna
+    function sortTableByColumn(columnName, button) {
+        // Otteniamo la direzione corrente di ordinamento
+        const currentDirection = button.dataset.direction;
+        
+        // Resettiamo tutti i pulsanti di ordinamento
+        document.querySelectorAll(".sort-button").forEach(btn => {
+            btn.dataset.direction = "none";
+            btn.innerHTML = "↕️";
+        });
+        
+        let newDirection;
+        
+        // Determiniamo la nuova direzione di ordinamento
+        switch (currentDirection) {
+            case "none":
+            case "desc":
+                newDirection = "asc";
+                button.innerHTML = "↑";
+                break;
+            case "asc":
+                newDirection = "desc";
+                button.innerHTML = "↓";
+                break;
+        }
+        
+        // Aggiorniamo lo stato del pulsante
+        button.dataset.direction = newDirection;
+        
+        // Ordiniamo i dati
+        tableData.sort((a, b) => {
+            let valA = a[columnName];
+            let valB = b[columnName];
+            
+            // Verifichiamo se i valori sono numerici
+            const isNumeric = !isNaN(parseFloat(valA)) && !isNaN(parseFloat(valB));
+            
+            if (isNumeric) {
+                valA = parseFloat(valA);
+                valB = parseFloat(valB);
+            } else {
+                // Per le stringhe, convertiamo tutto in minuscolo per un confronto case-insensitive
+                valA = String(valA).toLowerCase();
+                valB = String(valB).toLowerCase();
+            }
+            
+            // Confrontiamo i valori
+            if (valA < valB) return newDirection === "asc" ? -1 : 1;
+            if (valA > valB) return newDirection === "asc" ? 1 : -1;
+            return 0;
+        });
+        
+        // Aggiorniamo la tabella con i dati ordinati
+        const tbody = table.querySelector("tbody") || table;
+        
+        // Rimuoviamo tutte le righe tranne l'intestazione
+        while (tbody.rows.length > 1) {
+            tbody.removeChild(tbody.rows[1]);
+        }
+        
+        // Aggiungiamo le righe ordinate
+        tableData.forEach(row => {
             const tr = document.createElement("tr");
             columns.forEach(column => {
                 const td = document.createElement("td");
                 td.textContent = row[column];
                 tr.appendChild(td);
             });
-            table.appendChild(tr);
+            tbody.appendChild(tr);
         });
-    
-        tableContainer.appendChild(table);
     }
-    
-    
-    
-
-    function toggleColumnSelection(column, isChecked) {
-        if (isChecked) {
-            selectedColumns.push(column);
-        } else {
-            selectedColumns = selectedColumns.filter(col => col !== column);
-        }
-    }
-
-    document.getElementById("filterButton").addEventListener("click", applyFilters);
-
-    document.getElementById("visualizzaButton").addEventListener("click", function () {
-        if (selectedColumns.length === 0) {
-            alert("Seleziona almeno una colonna da visualizzare.");
-            return;
-        }
-        generateSelectedTable(currentData);
-    });
+}
     
     //filtro
     function applyFilters() {
