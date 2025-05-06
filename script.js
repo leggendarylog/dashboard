@@ -178,6 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
             visibleColumns.forEach(col => filteredRow[col] = row[col]);
             return filteredRow;
         });
+        console.log("Dati ordinati salvati in lastTableData:", lastTableData);
     }
     
     
