@@ -207,5 +207,38 @@ body {
   align-items: center;
   gap: 5px;
 }
+#obiettivoContainer {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 15px 20px;
+  border-radius: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Colori dinamici assegnati via JS con classi */
+.obiettivo-rosso {
+  background-color: #e74c3c; /* rosso */
+}
+
+.obiettivo-giallo {
+  background-color: #f1c40f; /* giallo */
+  color: #000;
+}
+
+.obiettivo-verde {
+  background-color: #2ecc71; /* verde */
+}
+
+.obiettivo-verde-completo {
+  background-color: #27ae60;
+  border: 2px solid #145a32;
+}
+
 
   

@@ -523,21 +523,24 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     function handleObiettivo() {
-        const columnName = selectedColumns[0];
-        let obiettivo = prompt("Inserisci il tuo obbiettivo (numero intero):");
-    
-        if (obiettivo === null) return; // annullato
-        obiettivo = parseInt(obiettivo);
-    
-        if (isNaN(obiettivo) || obiettivo <= 0) {
-            alert("Inserisci un numero valido maggiore di zero.");
+        if (selectedColumns.length !== 1) {
+            alert("Seleziona una sola colonna per impostare un obbiettivo.");
             return;
         }
     
+        const obiettivoInput = prompt("Inserisci il tuo obbiettivo (numero intero):");
+        const obiettivo = parseInt(obiettivoInput);
+    
+        if (isNaN(obiettivo) || obiettivo <= 0) {
+            alert("Valore non valido. Inserisci un numero intero positivo.");
+            return;
+        }
+    
+        const colonnaSelezionata = selectedColumns[0];
         let somma = 0;
     
         currentData.forEach(row => {
-            const valore = parseEuropeanNumber(row[columnName]);
+            const valore = parseEuropeanNumber(row[colonnaSelezionata]);
             if (valore !== null) {
                 somma += valore;
             }
@@ -545,48 +548,47 @@ document.addEventListener("DOMContentLoaded", function () {
     
         const percentuale = Math.round((somma / obiettivo) * 100);
     
-        let colore = "red";
-        let messaggio = "";
+        // Colori e messaggi dinamici
+        let classeColore = "";
+        let messaggio = `Avanzamento: ${percentuale}%`;
     
         if (percentuale <= 33) {
-            colore = "red";
+            classeColore = "obiettivo-rosso";
         } else if (percentuale <= 66) {
-            colore = "yellow";
+            classeColore = "obiettivo-giallo";
         } else if (percentuale <= 99) {
-            colore = "green";
+            classeColore = "obiettivo-verde";
         } else if (percentuale === 100) {
-            colore = "green";
+            classeColore = "obiettivo-verde-completo";
             messaggio = "<strong>Obbiettivo Completato!</strong>";
         } else if (percentuale > 100) {
-            colore = "green";
+            classeColore = "obiettivo-verde-completo";
             const extra = percentuale - 100;
             messaggio = `<strong>Obbiettivo Superato del ${extra}%</strong>`;
         }
     
-        // Crea o aggiorna il contenitore
+        // Creazione o aggiornamento del container
         let container = document.getElementById("obiettivoContainer");
         if (!container) {
             container = document.createElement("div");
             container.id = "obiettivoContainer";
-            container.style.marginTop = "20px";
-            container.style.padding = "15px";
-            container.style.border = "1px solid #ccc";
-            container.style.borderRadius = "8px";
-            container.style.maxWidth = "400px";
-            document.body.appendChild(container);
+            document.body.insertBefore(container, document.getElementById("tableContainer"));
         }
+    
+        container.className = classeColore;
     
         container.innerHTML = `
             <p><strong>Somma della colonna:</strong> ${somma.toFixed(2)}</p>
             <p><strong>Obbiettivo:</strong> ${obiettivo}</p>
-            <div style="background-color: #eee; height: 25px; border-radius: 5px; overflow: hidden;">
-                <div style="width: ${Math.min(percentuale, 100)}%; height: 100%; background-color: ${colore}; text-align: center; color: black; font-weight: bold;">
+            <div style="background-color: #ddd; height: 25px; border-radius: 5px; overflow: hidden;">
+                <div style="width: ${Math.min(percentuale, 100)}%; height: 100%; background-color: rgba(0,0,0,0.1); text-align: center; font-weight: bold;">
                     ${percentuale}%
                 </div>
             </div>
             <p style="margin-top: 10px;">${messaggio}</p>
         `;
     }
+    
     
     
     //controllo numeri decimali/migliaia
