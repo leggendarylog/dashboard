@@ -267,6 +267,13 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             calculateSubtraction(); // ✅ Chiamata alla funzione
         }
+        else if (action === "obbiettivo") {
+            if (selectedColumns.length !== 1) {
+                alert("Seleziona una sola colonna per il grafico a torta.");
+                return;
+            }
+            generatePieChart(currentData);
+        }
     });
 
     //generazione grafico a colonne
@@ -492,6 +499,93 @@ document.addEventListener("DOMContentLoaded", function () {
         resultContainer.appendChild(document.createElement("hr"));
         resultContainer.appendChild(subtractionDetails);
         resultContainer.appendChild(finalResult);
+    }
+
+    function parseEuropeanNumber(value) {
+        if (typeof value !== "string") value = value.toString().trim();
+        value = value.trim();
+    
+        if (value.includes(".") && value.includes(",")) {
+            value = value.replace(/\./g, "").replace(",", ".");
+        } else if (value.includes(".")) {
+            const parts = value.split(".");
+            const decimals = parts[1];
+            if (decimals && decimals.length === 3) {
+                value = value.replace(/\./g, "");
+            }
+        } else if (value.includes(",")) {
+            value = value.replace(",", ".");
+        }
+    
+        value = value.replace(/\s/g, "");
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+    
+    function handleObiettivo() {
+        const columnName = selectedColumns[0];
+        let obiettivo = prompt("Inserisci il tuo obbiettivo (numero intero):");
+    
+        if (obiettivo === null) return; // annullato
+        obiettivo = parseInt(obiettivo);
+    
+        if (isNaN(obiettivo) || obiettivo <= 0) {
+            alert("Inserisci un numero valido maggiore di zero.");
+            return;
+        }
+    
+        let somma = 0;
+    
+        currentData.forEach(row => {
+            const valore = parseEuropeanNumber(row[columnName]);
+            if (valore !== null) {
+                somma += valore;
+            }
+        });
+    
+        const percentuale = Math.round((somma / obiettivo) * 100);
+    
+        let colore = "red";
+        let messaggio = "";
+    
+        if (percentuale <= 33) {
+            colore = "red";
+        } else if (percentuale <= 66) {
+            colore = "yellow";
+        } else if (percentuale <= 99) {
+            colore = "green";
+        } else if (percentuale === 100) {
+            colore = "green";
+            messaggio = "<strong>Obbiettivo Completato!</strong>";
+        } else if (percentuale > 100) {
+            colore = "green";
+            const extra = percentuale - 100;
+            messaggio = `<strong>Obbiettivo Superato del ${extra}%</strong>`;
+        }
+    
+        // Crea o aggiorna il contenitore
+        let container = document.getElementById("obiettivoContainer");
+        if (!container) {
+            container = document.createElement("div");
+            container.id = "obiettivoContainer";
+            container.style.marginTop = "20px";
+            container.style.padding = "15px";
+            container.style.border = "1px solid #ccc";
+            container.style.borderRadius = "8px";
+            container.style.maxWidth = "400px";
+            document.body.appendChild(container);
+        }
+    
+        container.innerHTML = `
+            <p><strong>Somma della colonna:</strong> ${somma.toFixed(2)}</p>
+            <p><strong>Obbiettivo:</strong> ${obiettivo}</p>
+            <div style="background-color: #eee; height: 25px; border-radius: 5px; overflow: hidden;">
+                <div style="width: ${Math.min(percentuale, 100)}%; height: 100%; background-color: ${colore}; text-align: center; color: black; font-weight: bold;">
+                    ${percentuale}%
+                </div>
+            </div>
+            <p style="margin-top: 10px;">${messaggio}</p>
+        `;
     }
     
     
