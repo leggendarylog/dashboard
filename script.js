@@ -272,7 +272,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert("Seleziona una sola colonna per il grafico a torta.");
                 return;
             }
-            generatePieChart(currentData);
+            handleObiettivo();
         }
     });
 
