@@ -270,22 +270,27 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     //generazione grafico a colonne
-    function generateBarChart(data = lastTableData) {
+    function generateBarChart() {
         const chartContainer = document.getElementById("chartContainer");
         chartContainer.innerHTML = "";
     
+        // Verifica che ci siano dati validi
+        if (!Array.isArray(lastTableData) || lastTableData.length === 0) {
+            console.warn("Nessun dato disponibile in lastTableData per generare il grafico.");
+            return;
+        }
+    
         const chunkSize = 10;
-        const totalChunks = Math.ceil(data.length / chunkSize);
+        const totalChunks = Math.ceil(lastTableData.length / chunkSize);
     
         for (let i = 0; i < totalChunks; i++) {
-            const chunk = data.slice(i * chunkSize, (i + 1) * chunkSize);
+            const chunk = lastTableData.slice(i * chunkSize, (i + 1) * chunkSize);
     
             const labels = chunk.map(row => row[Object.keys(row)[0]]);
             const datasets = selectedColumns.map((col, index) => ({
                 label: col,
                 data: chunk.map(row => {
                     let rawValue = row[col];
-    
                     if (typeof rawValue === "string") {
                         rawValue = rawValue.replace(/\./g, "").replace(",", ".");
                     }
@@ -307,11 +312,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         legend: { position: "top" },
                         title: {
                             display: totalChunks > 1,
-                            text: `Grafico ${i + 1} (${i * chunkSize + 1}–${Math.min((i + 1) * chunkSize, data.length)})`
+                            text: `Grafico ${i + 1} (${i * chunkSize + 1}–${Math.min((i + 1) * chunkSize, lastTableData.length)})`
                         },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     return context.dataset.label + ': ' + context.formattedValue;
                                 }
                             }
@@ -323,7 +328,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             font: {
                                 weight: 'bold'
                             },
-                            formatter: function(value) {
+                            formatter: function (value) {
                                 return value.toLocaleString('it-IT', { maximumFractionDigits: 2 });
                             }
                         }
@@ -338,6 +343,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
     }
+    
     
     
     
