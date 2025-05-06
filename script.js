@@ -172,6 +172,12 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             table.appendChild(tr);
         });
+         // 🔧 AGGIORNA LA VARIABILE GLOBALE
+        lastTableData = tableData.map(row => {
+            const filteredRow = {};
+            visibleColumns.forEach(col => filteredRow[col] = row[col]);
+            return filteredRow;
+        });
     }
     
     
