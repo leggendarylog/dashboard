@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let jsonData = [];
     let selectedColumns = [];
     let currentData = [];
+    let lastTableData = [];
+
 
     document.getElementById("fileInput").addEventListener("change", function (event) {
         const file = event.target.files[0];
@@ -88,6 +90,12 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     
         tableContainer.appendChild(table);
+
+        lastTableData = data.map(row => {
+            const filteredRow = {};
+            columns.forEach(col => filteredRow[col] = row[col]);
+            return filteredRow;
+        });
     }
 
     // Funzione separata per l'ordinamento della tabella
@@ -254,13 +262,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     //generazione grafico a colonne
-    function generateBarChart(data) {
+    function generateBarChart(data = lastTableData) {
         const chartContainer = document.getElementById("chartContainer");
         chartContainer.innerHTML = "";
     
         const chunkSize = 10;
         const totalChunks = Math.ceil(data.length / chunkSize);
-        
+    
         for (let i = 0; i < totalChunks; i++) {
             const chunk = data.slice(i * chunkSize, (i + 1) * chunkSize);
     
@@ -318,10 +326,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     }
                 },
-                plugins: [ChartDataLabels] // qui serve il plugin ChartDataLabels
+                plugins: [ChartDataLabels]
             });
         }
     }
+    
     
     
     //grafico a torta
