@@ -79,6 +79,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
         tableContainer.appendChild(table);
     }
+    function toggleColumnSelection(column, isChecked) {
+        if (isChecked) {
+            selectedColumns.push(column);
+        } else {
+            selectedColumns = selectedColumns.filter(col => col !== column);
+        }
+    }
+
+    document.getElementById("filterButton").addEventListener("click", applyFilters);
+
+    document.getElementById("visualizzaButton").addEventListener("click", function () {
+        if (selectedColumns.length === 0) {
+            alert("Seleziona almeno una colonna da visualizzare.");
+            return;
+        }
+        generateSelectedTable(currentData);
+    });
     
     //filtro
     function applyFilters() {
