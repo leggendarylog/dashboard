@@ -11,7 +11,7 @@
   <!-- Header fisso in alto a sinistra -->
   <div class="header">
     <div class="header-content">
-      <img src="source\logo.png" alt="Logo Azienda" class="logo">
+      <img src="source/logo.png" alt="Logo Azienda" class="logo">
       <h1>Dashboard Venditori - Istruzioni</h1>
     </div>
   </div>
@@ -20,32 +20,40 @@
   <div class="content-area">
     <div class="container">
       <button onclick="window.history.back()" id="backButton">Indietro</button>
+
+      <h2>Come usare il filtro</h2>
+      <p>Per cercare informazioni in una colonna, ti basta scrivere il nome o la parola che vuoi trovare nello spazio sopra la colonna.</p>
+      <ul>
+        <li>Puoi scriverla in maiuscolo o minuscolo, il programma la trova comunque.</li>
+        <li>Se vuoi cercare più cose nello stesso campo, separale con un trattino. Esempio: <strong>MI - VA</strong> cercherà sia "MI" che "VA".</li>
+        <li><strong>ATTENZIONE:</strong> se dopo aver messo un filtro ne vuoi aggiungere un altro in una colonna diversa, <strong>devi riscrivere tutti i filtri</strong> che vuoi usare e poi premere il bottone "Filtra". Così il sistema li considera tutti insieme.</li>
+      </ul>
+
       <h2>Guida all'utilizzo del programma</h2>
       <p>Questa pagina ti guiderà attraverso i passaggi necessari per utilizzare correttamente il programma.</p>
 
       <h3>1. Esporta il file Excel in formato .CSV</h3>
       <p>Per prima cosa, esporta il tuo file Excel in formato .CSV. Puoi farlo tramite il menu di Excel:</p>
       <ul>
-        <li>Vai su "File" > "Esporta".</li>
+        <li>Vai su "File" &gt; "Esporta".</li>
         <li>Scegli il formato "CSV (Comma delimited)".</li>
       </ul>
       <p><strong>Immagine di esempio:</strong></p>
-      <img src="source\screen1.png" alt="Esporta Excel in CSV" width="500">
+      <img src="source/screen1.png" alt="Esporta Excel in CSV" width="500">
       
       <h3>2. Converti il file .CSV in formato JSON</h3>
       <p>Utilizza un convertitore online gratuito per convertire il tuo file .CSV in JSON. Un sito utile per questa operazione è:</p>
-      <a href="https://csvjson.com/" target="_blank">https://www.convertcsv.com/csv-to-json.htm</a>
+      <a href="https://www.convertcsv.com/csv-to-json.htm" target="_blank">https://www.convertcsv.com/csv-to-json.htm</a>
       <p><strong>Immagine di esempio del sito:</strong></p>
-      <img src="source\screen2.png" alt="Convertitore CSV a JSON" width="1000">
+      <img src="source/screen2.png" alt="Convertitore CSV a JSON" width="1000">
 
       <h3>3. Carica il file JSON</h3>
       <p>Una volta che hai il file JSON, puoi caricarlo nel programma utilizzando il pulsante "CSV to JSON". Seleziona il file dal tuo computer e caricalo.</p>
       <p><strong>Immagine di esempio del caricamento:</strong></p>
-      <img src="source\screen3.png" alt="Carica il file JSON" width="1000">
+      <img src="source/screen3.png" alt="Carica il file JSON" width="1000">
 
       <h3>4. Risoluzione dei problemi</h3>
       <p>Se hai problemi con il caricamento del file o il programma non funziona correttamente, prova ad aggiornare la pagina.</p>
-
     </div>
   </div>
 
