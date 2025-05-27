@@ -6,22 +6,32 @@ document.addEventListener("DOMContentLoaded", function () {
     let selectedRowsForEdit = [];
 
 
-    document.getElementById("fileInput").addEventListener("change", function (event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                try {
-                    jsonData = JSON.parse(e.target.result);
-                    currentData = jsonData;
-                    generateTable(jsonData);
-                } catch (error) {
-                    alert("Errore nel file JSON");
-                }
-            };
-            reader.readAsText(file);
-        }
-    });
+document.getElementById("fileInput").addEventListener("change", function(event) {
+    const file = event.target.files[0];
+    if (file && file.type === "application/json") {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const jsonData = JSON.parse(e.target.result);
+                
+                // ✅ NUOVO: Salva i dati originali nel sessionStorage
+                sessionStorage.setItem('originalJsonData', JSON.stringify(jsonData));
+                
+                // Resto del codice esistente...
+                generateFilters(jsonData);
+                generateTable(jsonData);
+                generateActionMenu(jsonData);
+                
+                console.log("File JSON caricato e salvato nel sessionStorage");
+            } catch (error) {
+                alert("Errore nella lettura del file JSON: " + error.message);
+            }
+        };
+        reader.readAsText(file);
+    } else {
+        alert("Seleziona un file JSON valido");
+    }
+});
       
 
     //generazione tabella iniziale
@@ -680,6 +690,37 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 }
 
+    
+function reloadDataFromStorage() {
+    const storedData = sessionStorage.getItem('originalJsonData');
+    if (storedData) {
+        try {
+            const jsonData = JSON.parse(storedData);
+            generateFilters(jsonData);
+            generateTable(jsonData);
+            generateActionMenu(jsonData);
+            console.log("Dati ricaricati dal sessionStorage");
+            return true;
+        } catch (error) {
+            console.error("Errore nel ricaricare i dati:", error);
+            return false;
+        }
+    }
+    return false;
+}
+
+// ✅ NUOVO: Controlla se ci sono dati aggiornati quando la pagina viene caricata
+window.addEventListener('focus', function() {
+    // Controlla se siamo tornati dalla pagina di modifica
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('refresh') === 'true') {
+        reloadDataFromStorage();
+        // Rimuovi il parametro dall'URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});
+
+// ✅ MODIFICA la funzione openEditPage esistente:
 function openEditPage() {
     if (selectedRowsForEdit.length === 0) {
         alert("Seleziona almeno una riga da modificare");
@@ -689,11 +730,16 @@ function openEditPage() {
     // Salva i dati selezionati nel sessionStorage
     sessionStorage.setItem('selectedRowsForEdit', JSON.stringify(selectedRowsForEdit));
     
+    // ✅ NUOVO: Salva anche i dati completi se non sono già presenti
+    if (!sessionStorage.getItem('originalJsonData')) {
+        if (lastTableData && lastTableData.length > 0) {
+            sessionStorage.setItem('originalJsonData', JSON.stringify(lastTableData));
+        }
+    }
+    
     // Apri la pagina di modifica
     window.location.href = 'modifica.html';
 }
-    
-    
     
     
     
