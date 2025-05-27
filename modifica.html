@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modifica Righe - Dashboard venditori</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+  <!-- Header fisso in alto a sinistra -->
+  <div class="header">
+    <div class="header-content">
+      <img src="source\logo.png" alt="Logo Azienda" class="logo">
+      <h1>Modifica Righe - Dashboard Venditori</h1>
+    </div>
+  </div>
+
+  <!-- Area contenuti scrollabile -->
+  <div class="content-area">
+    <div class="container">
+      <button id="backButton" onclick="window.history.back()">← Torna Indietro</button>
+      
+      <h2>Modifica Righe Selezionate</h2>
+      <p>Qui puoi modificare i dati delle righe selezionate dalla tabella principale.</p>
+      
+      <div id="editContainer">
+        <!-- Le righe selezionate verranno visualizzate qui -->
+      </div>
+      
+      <div style="margin-top: 20px;">
+        <button id="saveButton" style="padding: 10px 20px; background-color: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+          Salva Modifiche
+        </button>
+        <button id="cancelButton" style="padding: 10px 20px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          Annulla
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Recupera i dati delle righe selezionate dal sessionStorage
+    const selectedRows = JSON.parse(sessionStorage.getItem('selectedRowsForEdit') || '[]');
+    
+    function displaySelectedRows() {
+      const container = document.getElementById('editContainer');
+      
+      if (selectedRows.length === 0) {
+        container.innerHTML = '<p>Nessuna riga selezionata per la modifica.</p>';
+        return;
+      }
+      
+      selectedRows.forEach((rowItem, index) => {
+        const rowData = rowItem.data;
+        const rowDiv = document.createElement('div');
+        rowDiv.style.marginBottom = '30px';
+        rowDiv.style.padding = '20px';
+        rowDiv.style.border = '1px solid #ddd';
+        rowDiv.style.borderRadius = '8px';
+        rowDiv.style.backgroundColor = '#f9f9f9';
+        
+        const title = document.createElement('h3');
+        title.textContent = `Riga ${index + 1}`;
+        title.style.color = '#0977b8';
+        title.style.marginBottom = '15px';
+        rowDiv.appendChild(title);
+        
+        // Crea i campi di input per ogni proprietà della riga
+        Object.keys(rowData).forEach(key => {
+          const fieldDiv = document.createElement('div');
+          fieldDiv.style.marginBottom = '10px';
+          fieldDiv.style.display = 'flex';
+          fieldDiv.style.alignItems = 'center';
+          fieldDiv.style.gap = '10px';
+          
+          const label = document.createElement('label');
+          label.textContent = key + ':';
+          label.style.minWidth = '150px';
+          label.style.fontWeight = 'bold';
+          
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.value = rowData[key] || '';
+          input.style.padding = '5px';
+          input.style.border = '1px solid #ddd';
+          input.style.borderRadius = '4px';
+          input.style.flex = '1';
+          input.dataset.rowIndex = index;
+          input.dataset.field = key;
+          
+          fieldDiv.appendChild(label);
+          fieldDiv.appendChild(input);
+          rowDiv.appendChild(fieldDiv);
+        });
+        
+        container.appendChild(rowDiv);
+      });
+    }
+    
+    // Gestori eventi per i bottoni
+    document.getElementById('saveButton').addEventListener('click', function() {
+      // Per ora mostra solo un messaggio, implementeremo il salvataggio dopo
+      alert('Funzionalità di salvataggio sarà implementata nel prossimo step');
+    });
+    
+    document.getElementById('cancelButton').addEventListener('click', function() {
+      if (confirm('Sei sicuro di voler annullare le modifiche?')) {
+        window.history.back();
+      }
+    });
+    
+    // Carica e visualizza le righe selezionate al caricamento della pagina
+    document.addEventListener('DOMContentLoaded', displaySelectedRows);
+  </script>
+
+</body>
+</html>

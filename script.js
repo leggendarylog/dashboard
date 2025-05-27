@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let selectedColumns = [];
     let currentData = [];
     let lastTableData = [];
+    let selectedRowsForEdit = [];
 
 
     document.getElementById("fileInput").addEventListener("change", function (event) {
@@ -25,78 +26,112 @@ document.addEventListener("DOMContentLoaded", function () {
 
     //generazione tabella iniziale
     function generateTable(data, visibleColumns = null) {
-        const tableContainer = document.getElementById("tableContainer");
-        tableContainer.innerHTML = "";
-    
-        if (!Array.isArray(data) || data.length === 0) {
-            alert("Il JSON caricato non è valido");
-            return;
-        }
-    
-        const table = document.createElement("table");
-        table.classList.add("data-table");
-        table.id = "dataTable"; // Aggiungiamo un ID alla tabella per riferimento
-        const headerRow = document.createElement("tr");
-    
-        const columns = visibleColumns || Object.keys(data[0]);
-    
-        columns.forEach(column => {
-            const th = document.createElement("th");
-    
-            const group = document.createElement("div");
-            group.classList.add("filter-group");
-    
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.checked = selectedColumns.includes(column);
-            checkbox.addEventListener("change", () => toggleColumnSelection(column, checkbox.checked));
-    
-            const label = document.createElement("label");
-            label.textContent = column;
-    
-            const filterInput = document.createElement("input");
-            filterInput.type = "text";
-            filterInput.placeholder = "Filtra...";
-            filterInput.classList.add("filter-input");
-            filterInput.dataset.column = column;
-    
-            // Aggiungiamo il pulsante di ordinamento a forma di freccia
-            const sortButton = document.createElement("button");
-            sortButton.classList.add("sort-button");
-            sortButton.innerHTML = "↕️"; // Freccia su e giù
-            sortButton.dataset.column = column;
-            sortButton.dataset.direction = "none"; // Stato iniziale: nessun ordinamento
-            sortButton.addEventListener("click", () => sortTableByColumn(data, column, sortButton));
-    
-            group.appendChild(checkbox);
-            group.appendChild(label);
-            group.appendChild(filterInput);
-            group.appendChild(sortButton);
-    
-            th.appendChild(group);
-            headerRow.appendChild(th);
-        });
-    
-        table.appendChild(headerRow);
-    
-        data.forEach(row => {
-            const tr = document.createElement("tr");
-            columns.forEach(column => {
-                const td = document.createElement("td");
-                td.textContent = row[column];
-                tr.appendChild(td);
-            });
-            table.appendChild(tr);
-        });
-    
-        tableContainer.appendChild(table);
+    const tableContainer = document.getElementById("tableContainer");
+    tableContainer.innerHTML = "";
 
-        lastTableData = data.map(row => {
-            const filteredRow = {};
-            columns.forEach(col => filteredRow[col] = row[col]);
-            return filteredRow;
-        });
+    if (!Array.isArray(data) || data.length === 0) {
+        alert("Il JSON caricato non è valido");
+        return;
     }
+
+    // Aggiungi il bottone Modifica sopra la tabella
+    const editButtonContainer = document.createElement("div");
+    editButtonContainer.style.marginBottom = "10px";
+    
+    const editButton = document.createElement("button");
+    editButton.id = "editButton";
+    editButton.textContent = "Modifica Righe Selezionate";
+    editButton.style.padding = "6px 12px";
+    editButton.style.backgroundColor = "#0977b8";
+    editButton.style.color = "white";
+    editButton.style.border = "none";
+    editButton.style.borderRadius = "4px";
+    editButton.style.cursor = "pointer";
+    editButton.style.marginRight = "10px";
+    editButton.addEventListener("click", openEditPage);
+    
+    editButtonContainer.appendChild(editButton);
+    tableContainer.appendChild(editButtonContainer);
+
+    const table = document.createElement("table");
+    table.classList.add("data-table");
+    table.id = "dataTable";
+    const headerRow = document.createElement("tr");
+
+    // Aggiungi colonna per checkbox di selezione riga
+    const selectTh = document.createElement("th");
+    selectTh.textContent = "Seleziona";
+    selectTh.style.width = "80px";
+    headerRow.appendChild(selectTh);
+
+    const columns = visibleColumns || Object.keys(data[0]);
+
+    columns.forEach(column => {
+        const th = document.createElement("th");
+
+        const group = document.createElement("div");
+        group.classList.add("filter-group");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = selectedColumns.includes(column);
+        checkbox.addEventListener("change", () => toggleColumnSelection(column, checkbox.checked));
+
+        const label = document.createElement("label");
+        label.textContent = column;
+
+        const filterInput = document.createElement("input");
+        filterInput.type = "text";
+        filterInput.placeholder = "Filtra...";
+        filterInput.classList.add("filter-input");
+        filterInput.dataset.column = column;
+
+        const sortButton = document.createElement("button");
+        sortButton.classList.add("sort-button");
+        sortButton.innerHTML = "↕️";
+        sortButton.dataset.column = column;
+        sortButton.dataset.direction = "none";
+        sortButton.addEventListener("click", () => sortTableByColumn(data, column, sortButton));
+
+        group.appendChild(checkbox);
+        group.appendChild(label);
+        group.appendChild(filterInput);
+        group.appendChild(sortButton);
+
+        th.appendChild(group);
+        headerRow.appendChild(th);
+    });
+
+    table.appendChild(headerRow);
+
+    data.forEach((row, index) => {
+        const tr = document.createElement("tr");
+        
+        // Aggiungi checkbox per selezione riga
+        const selectTd = document.createElement("td");
+        const rowCheckbox = document.createElement("input");
+        rowCheckbox.type = "checkbox";
+        rowCheckbox.dataset.rowIndex = index;
+        rowCheckbox.addEventListener("change", (e) => toggleRowSelection(index, row, e.target.checked));
+        selectTd.appendChild(rowCheckbox);
+        tr.appendChild(selectTd);
+
+        columns.forEach(column => {
+            const td = document.createElement("td");
+            td.textContent = row[column];
+            tr.appendChild(td);
+        });
+        table.appendChild(tr);
+    });
+
+    tableContainer.appendChild(table);
+
+    lastTableData = data.map(row => {
+        const filteredRow = {};
+        columns.forEach(col => filteredRow[col] = row[col]);
+        return filteredRow;
+    });
+}
 
     // Funzione separata per l'ordinamento della tabella
     function sortTableByColumn(originalData, columnName, button) {
@@ -634,6 +669,29 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         generateTable(data, selectedColumns); // ✅ genera la tabella con checkbox e filtri mantenuti
     }
+
+
+    //modifica
+    function toggleRowSelection(index, rowData, isSelected) {
+    if (isSelected) {
+        selectedRowsForEdit.push({ index: index, data: rowData });
+    } else {
+        selectedRowsForEdit = selectedRowsForEdit.filter(item => item.index !== index);
+    }
+}
+
+function openEditPage() {
+    if (selectedRowsForEdit.length === 0) {
+        alert("Seleziona almeno una riga da modificare");
+        return;
+    }
+    
+    // Salva i dati selezionati nel sessionStorage
+    sessionStorage.setItem('selectedRowsForEdit', JSON.stringify(selectedRowsForEdit));
+    
+    // Apri la pagina di modifica
+    window.location.href = 'modifica.html';
+}
     
     
     
