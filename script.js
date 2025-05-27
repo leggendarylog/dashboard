@@ -4,34 +4,25 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentData = [];
     let lastTableData = [];
     let selectedRowsForEdit = [];
+    let fullJsonData = [];
 
 
-document.getElementById("fileInput").addEventListener("change", function(event) {
-    const file = event.target.files[0];
-    if (file && file.type === "application/json") {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const jsonData = JSON.parse(e.target.result);
-                
-                // ✅ NUOVO: Salva i dati originali nel sessionStorage
-                sessionStorage.setItem('originalJsonData', JSON.stringify(jsonData));
-                
-                // Resto del codice esistente...
-                generateFilters(jsonData);
-                generateTable(jsonData);
-                generateActionMenu(jsonData);
-                
-                console.log("File JSON caricato e salvato nel sessionStorage");
-            } catch (error) {
-                alert("Errore nella lettura del file JSON: " + error.message);
-            }
-        };
-        reader.readAsText(file);
-    } else {
-        alert("Seleziona un file JSON valido");
-    }
-});
+    document.getElementById("fileInput").addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    jsonData = JSON.parse(e.target.result);
+                    currentData = jsonData;
+                    generateTable(jsonData);
+                } catch (error) {
+                    alert("Errore nel file JSON");
+                }
+            };
+            reader.readAsText(file);
+        }
+    });
       
 
     //generazione tabella iniziale
@@ -58,7 +49,7 @@ document.getElementById("fileInput").addEventListener("change", function(event) 
     editButton.style.borderRadius = "4px";
     editButton.style.cursor = "pointer";
     editButton.style.marginRight = "10px";
-    editButton.addEventListener("click", openEditPage);
+    editButton.addEventListener("click", openEditPageNew);
     
     editButtonContainer.appendChild(editButton);
     tableContainer.appendChild(editButtonContainer);
@@ -143,6 +134,13 @@ document.getElementById("fileInput").addEventListener("change", function(event) 
     });
 }
 
+function toggleRowSelection(index, rowData, isSelected) {
+    if (isSelected) {
+        selectedRowsForEdit.push({ index: index, data: rowData });
+    } else {
+        selectedRowsForEdit = selectedRowsForEdit.filter(item => item.index !== index);
+    }
+}
     // Funzione separata per l'ordinamento della tabella
     function sortTableByColumn(originalData, columnName, button) {
         let tableData = [...originalData];
@@ -680,8 +678,7 @@ document.getElementById("fileInput").addEventListener("change", function(event) 
         generateTable(data, selectedColumns); // ✅ genera la tabella con checkbox e filtri mantenuti
     }
 
-
-    //modifica
+    
     function toggleRowSelection(index, rowData, isSelected) {
     if (isSelected) {
         selectedRowsForEdit.push({ index: index, data: rowData });
@@ -690,37 +687,6 @@ document.getElementById("fileInput").addEventListener("change", function(event) 
     }
 }
 
-    
-function reloadDataFromStorage() {
-    const storedData = sessionStorage.getItem('originalJsonData');
-    if (storedData) {
-        try {
-            const jsonData = JSON.parse(storedData);
-            generateFilters(jsonData);
-            generateTable(jsonData);
-            generateActionMenu(jsonData);
-            console.log("Dati ricaricati dal sessionStorage");
-            return true;
-        } catch (error) {
-            console.error("Errore nel ricaricare i dati:", error);
-            return false;
-        }
-    }
-    return false;
-}
-
-// ✅ NUOVO: Controlla se ci sono dati aggiornati quando la pagina viene caricata
-window.addEventListener('focus', function() {
-    // Controlla se siamo tornati dalla pagina di modifica
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('refresh') === 'true') {
-        reloadDataFromStorage();
-        // Rimuovi il parametro dall'URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-});
-
-// ✅ MODIFICA la funzione openEditPage esistente:
 function openEditPage() {
     if (selectedRowsForEdit.length === 0) {
         alert("Seleziona almeno una riga da modificare");
@@ -730,16 +696,129 @@ function openEditPage() {
     // Salva i dati selezionati nel sessionStorage
     sessionStorage.setItem('selectedRowsForEdit', JSON.stringify(selectedRowsForEdit));
     
-    // ✅ NUOVO: Salva anche i dati completi se non sono già presenti
-    if (!sessionStorage.getItem('originalJsonData')) {
-        if (lastTableData && lastTableData.length > 0) {
-            sessionStorage.setItem('originalJsonData', JSON.stringify(lastTableData));
+    // Apri la pagina di modifica
+    window.location.href = 'modifica.html';
+}
+function saveJsonDataToStorage(jsonData) {
+    try {
+        fullJsonData = jsonData;
+        sessionStorage.setItem('originalJsonData', JSON.stringify(jsonData));
+        console.log("Dati JSON salvati nel sessionStorage");
+    } catch (error) {
+        console.error("Errore nel salvare i dati:", error);
+    }
+}
+
+// Nuova funzione che si attacca all'evento di caricamento file esistente
+function attachFileLoadListener() {
+    const fileInput = document.getElementById("fileInput");
+    if (fileInput) {
+        // Aggiungi un listener aggiuntivo senza rimuovere quelli esistenti
+        fileInput.addEventListener("change", function(event) {
+            const file = event.target.files[0];
+            if (file && file.type === "application/json") {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const jsonData = JSON.parse(e.target.result);
+                        // Salva i dati per le modifiche
+                        saveJsonDataToStorage(jsonData);
+                    } catch (error) {
+                        console.error("Errore nel processing per modifica:", error);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+    }
+}
+
+// Nuova funzione per ricaricare i dati modificati nella tabella principale
+function refreshTableWithModifiedData() {
+    const storedData = sessionStorage.getItem('originalJsonData');
+    if (storedData) {
+        try {
+            const jsonData = JSON.parse(storedData);
+            fullJsonData = jsonData;
+            
+            // Usa le funzioni esistenti per rigenerare tutto
+            if (typeof generateFilters === 'function') {
+                generateFilters(jsonData);
+            }
+            if (typeof generateTable === 'function') {
+                generateTable(jsonData);
+            }
+            if (typeof generateActionMenu === 'function') {
+                generateActionMenu(jsonData);
+            }
+            
+            console.log("Tabella aggiornata con i dati modificati");
+            return true;
+        } catch (error) {
+            console.error("Errore nel ricaricare i dati modificati:", error);
+            return false;
         }
+    }
+    return false;
+}
+
+// Nuova funzione per gestire il ritorno dalla pagina di modifica
+function handleReturnFromEdit() {
+    // Controlla se stiamo tornando dalla pagina di modifica
+    if (document.referrer.includes('modifica.html')) {
+        setTimeout(() => {
+            refreshTableWithModifiedData();
+        }, 100);
+    }
+}
+
+// Nuova funzione migliorata per aprire la pagina di modifica
+function openEditPageNew() {
+    if (selectedRowsForEdit.length === 0) {
+        alert("Seleziona almeno una riga da modificare");
+        return;
+    }
+    
+    // Salva i dati selezionati nel sessionStorage
+    sessionStorage.setItem('selectedRowsForEdit', JSON.stringify(selectedRowsForEdit));
+    
+    // Assicurati che i dati completi siano salvati
+    if (fullJsonData.length > 0) {
+        sessionStorage.setItem('originalJsonData', JSON.stringify(fullJsonData));
+    } else if (lastTableData && lastTableData.length > 0) {
+        sessionStorage.setItem('originalJsonData', JSON.stringify(lastTableData));
     }
     
     // Apri la pagina di modifica
     window.location.href = 'modifica.html';
 }
+
+// Nuova funzione per inizializzare le funzionalità di modifica
+function initializeEditFeatures() {
+    // Attacca il listener per il caricamento file
+    attachFileLoadListener();
+    
+    // Gestisci il ritorno dalla pagina di modifica
+    window.addEventListener('focus', handleReturnFromEdit);
+    
+    // Controlla se stiamo tornando dalla pagina di modifica al caricamento
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(handleReturnFromEdit, 200);
+    });
+}
+
+// ========================================
+// INIZIALIZZAZIONE AUTOMATICA
+// ========================================
+
+// Auto-inizializza quando il DOM è pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeEditFeatures);
+} else {
+    initializeEditFeatures();
+}
+    
+    
     
     
     
