@@ -143,86 +143,103 @@ function toggleRowSelection(index, rowData, isSelected) {
 }
     // Funzione separata per l'ordinamento della tabella
     function sortTableByColumn(originalData, columnName, button) {
-        let tableData = [...originalData];
-    
-        const currentDirection = button.dataset.direction;
-    
-        document.querySelectorAll(".sort-button").forEach(btn => {
-            btn.dataset.direction = "none";
-            btn.innerHTML = "↕️";
-        });
-    
-        let newDirection;
-    
-        switch (currentDirection) {
-            case "none":
-            case "desc":
-                newDirection = "asc";
-                button.innerHTML = "↑";
-                break;
-            case "asc":
-                newDirection = "desc";
-                button.innerHTML = "↓";
-                break;
+    let tableData = [...originalData];
+
+    const currentDirection = button.dataset.direction;
+
+    document.querySelectorAll(".sort-button").forEach(btn => {
+        btn.dataset.direction = "none";
+        btn.innerHTML = "↕️";
+    });
+
+    let newDirection;
+
+    switch (currentDirection) {
+        case "none":
+        case "desc":
+            newDirection = "asc";
+            button.innerHTML = "↑";
+            break;
+        case "asc":
+            newDirection = "desc";
+            button.innerHTML = "↓";
+            break;
+    }
+
+    button.dataset.direction = newDirection;
+
+    tableData.sort((a, b) => {
+        let valA = a[columnName];
+        let valB = b[columnName];
+
+        // ✅ Usa parseEuropeanNumber per entrambi i valori
+        const parsedA = parseEuropeanNumber(valA);
+        const parsedB = parseEuropeanNumber(valB);
+
+        const isNumeric = typeof parsedA === 'number' && typeof parsedB === 'number' &&
+                          !isNaN(parsedA) && !isNaN(parsedB);
+
+        if (isNumeric) {
+            valA = parsedA;
+            valB = parsedB;
+        } else {
+            valA = String(valA).toLowerCase();
+            valB = String(valB).toLowerCase();
         }
-    
-        button.dataset.direction = newDirection;
-    
-        tableData.sort((a, b) => {
-            let valA = a[columnName];
-            let valB = b[columnName];
-    
-            // ✅ Usa parseEuropeanNumber per entrambi i valori
-            const parsedA = parseEuropeanNumber(valA);
-            const parsedB = parseEuropeanNumber(valB);
-    
-            const isNumeric = typeof parsedA === 'number' && typeof parsedB === 'number' &&
-                              !isNaN(parsedA) && !isNaN(parsedB);
-    
-            if (isNumeric) {
-                valA = parsedA;
-                valB = parsedB;
-            } else {
-                valA = String(valA).toLowerCase();
-                valB = String(valB).toLowerCase();
-            }
-    
-            if (valA < valB) return newDirection === "asc" ? -1 : 1;
-            if (valA > valB) return newDirection === "asc" ? 1 : -1;
-            return 0;
-        });
-    
-        const table = document.getElementById("dataTable");
-        const visibleColumns = [];
-        const headers = table.querySelectorAll("th");
-    
-        headers.forEach(header => {
+
+        if (valA < valB) return newDirection === "asc" ? -1 : 1;
+        if (valA > valB) return newDirection === "asc" ? 1 : -1;
+        return 0;
+    });
+
+    const table = document.getElementById("dataTable");
+    const visibleColumns = [];
+    const headers = table.querySelectorAll("th");
+
+    // Salta la prima colonna (Seleziona) per ottenere solo le colonne dati
+    headers.forEach((header, index) => {
+        if (index > 0) { // Salta la colonna "Seleziona"
             const group = header.querySelector(".filter-group");
             const label = group.querySelector("label");
             visibleColumns.push(label.textContent);
-        });
-    
-        while (table.rows.length > 1) {
-            table.deleteRow(1);
         }
-    
-        tableData.forEach(row => {
-            const tr = document.createElement("tr");
-            visibleColumns.forEach(column => {
-                const td = document.createElement("td");
-                td.textContent = row[column];
-                tr.appendChild(td);
-            });
-            table.appendChild(tr);
-        });
-         // 🔧 AGGIORNA LA VARIABILE GLOBALE
-        lastTableData = tableData.map(row => {
-            const filteredRow = {};
-            visibleColumns.forEach(col => filteredRow[col] = row[col]);
-            return filteredRow;
-        });
-        console.log("Dati ordinati salvati in lastTableData:", lastTableData);
+    });
+
+    // Rimuovi tutte le righe tranne l'header
+    while (table.rows.length > 1) {
+        table.deleteRow(1);
     }
+
+    // Ricrea le righe con i dati ordinati
+    tableData.forEach((row, index) => {
+        const tr = document.createElement("tr");
+        
+        // Aggiungi prima la colonna checkbox
+        const selectTd = document.createElement("td");
+        const rowCheckbox = document.createElement("input");
+        rowCheckbox.type = "checkbox";
+        rowCheckbox.dataset.rowIndex = index;
+        rowCheckbox.addEventListener("change", (e) => toggleRowSelection(index, row, e.target.checked));
+        selectTd.appendChild(rowCheckbox);
+        tr.appendChild(selectTd);
+        
+        // Poi aggiungi le colonne dati
+        visibleColumns.forEach(column => {
+            const td = document.createElement("td");
+            td.textContent = row[column];
+            tr.appendChild(td);
+        });
+        table.appendChild(tr);
+    });
+    
+    // 🔧 AGGIORNA LA VARIABILE GLOBALE
+    lastTableData = tableData.map(row => {
+        const filteredRow = {};
+        visibleColumns.forEach(col => filteredRow[col] = row[col]);
+        return filteredRow;
+    });
+    console.log("Dati ordinati salvati in lastTableData:", lastTableData);
+}
     
     
 
